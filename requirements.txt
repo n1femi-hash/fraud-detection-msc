@@ -1,2 +1,4 @@
 haversine~=2.9.0
 pandas~=2.2.3
+imbalanced-learn~=0.12.4
+numpy~=1.23.5
