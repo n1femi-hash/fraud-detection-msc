@@ -1,0 +1,26 @@
+{
+  "Infant": [
+    0,
+    1
+  ],
+  "Toddler": [
+    2,
+    4
+  ],
+  "Child": [
+    5,
+    12
+  ],
+  "Teenager": [
+    13,
+    19
+  ],
+  "Young Adult": [
+    20,
+    39
+  ],
+  "Middle-aged Adult": [
+    40,
+    59
+  ]
+}
