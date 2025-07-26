@@ -22,7 +22,7 @@ def augment_data(df_cleaned):
     # the plan is to generate a data times 10 of the original data
     # the original data already accounts for 1 out of the 10 leaving us with 9
     # the length of the data is therefore multiplied by 9 to get the length of the synthetic data
-    rows_to_generate = len(df_cleaned) * 9
+    rows_to_generate = len(df_cleaned) * 4
 
     # an object to capture the distributions of elements in a particular column is instantiated here
     value_distributions = {}
@@ -54,3 +54,6 @@ def augment_data(df_cleaned):
 # the augmentation is applied on both training and test data
 dataframe_cleaned = augment_data(dataframe_cleaned)
 dataframe_test_cleaned = augment_data(dataframe_test_cleaned)
+
+dataframe_cleaned.to_csv('../assets/augmented_fraud_train.csv', index=False)
+dataframe_test_cleaned.to_csv('../assets/augmented_fraud_test.csv', index=False)

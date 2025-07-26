@@ -11,7 +11,7 @@ dataframe_test = pd.read_csv('../assets/fraudTest.csv')
 # a list of columns that will no longer be needed after the necessary information has been extracted including
 # the first column which is unnamed
 columns_to_remove = [dataframe.columns[0], 'cc_num', 'trans_num', 'unix_time', 'dob', 'trans_date_trans_time', 'lat',
-                     'long', 'merch_lat', 'merch_long', 'job', 'age', 'amt']
+                     'long', 'merch_lat', 'merch_long', 'job', 'age', 'amt', 'trans_distance']
 # jobs are categorised into sectors and the sectors are loaded from a json file
 job_sectors = json.load(Path('../misc/job_sector.json').open())
 age_groups = json.load(Path('../misc/age_group.json').open())
@@ -41,6 +41,23 @@ def extract_age(data):
     dob = [int(d) for d in data.split("-")]
     difference = date.today() - date(dob[0], dob[1], dob[2])
     return difference.days // 365
+
+
+# divide distances into 4 groups based on percentile distribution
+# Only 3 groups are highlighted here with anything more than or equal to the max highlighted as the farthest by default
+def prepare_distance_grouping(data_description):
+    _, _, _, _, quarter, half, three_quarter, full = data_description
+    groupings = {"Nearest": [0, quarter], "Near": [quarter, three_quarter], "Far": [three_quarter, full + 1]}
+    return groupings
+
+
+# set trans_distance into distance groups
+def group_distance(data, groupings):
+    try:
+        selected_group = [k for k, v in groupings.items() if v[0] <= data < v[1]][0]
+    except:
+        selected_group = "Farthest"
+    return selected_group
 
 
 # this applies the job sector based on the jobs highlighted in the job column
@@ -85,6 +102,9 @@ def clean_dataframe(dataframe_copy):
     # the 'trans_distance' column formed by applying the 'calculate_distance' function on the first axis
     # of the dataframe
     dataframe_copy["trans_distance"] = dataframe_copy.apply(calculate_distance, axis=1)
+    groupings = prepare_distance_grouping(dataframe_copy['trans_distance'].describe())
+    dataframe_copy["trans_distance_group"] = dataframe_copy['trans_distance'].apply(
+        lambda x: group_distance(x, groupings))
     # the predefined columns to be removed are dropped on the first axis
     dataframe_copy = dataframe_copy.drop(columns_to_remove, axis=1)
     return dataframe_copy
