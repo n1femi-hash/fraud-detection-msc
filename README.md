@@ -92,19 +92,20 @@ This script prepares the raw Kaggle dataset for machine learning by extracting r
 
 #### 🗂️ Output Schema After Cleaning
 
-| Feature           | Description                                            |
-| ----------------- | ------------------------------------------------------ |
-| `category`        | Transaction type/category                              |
-| `amt`             | Transaction amount                                     |
-| `gender`          | Gender of card owner                                   |
-| `city`, `state`   | Geographical data                                      |
-| `zip`, `merchant` | Zip and merchant info                                  |
-| `is_fraud`        | Label: 1 for fraud, 0 otherwise                        |
-| `age`             | Age calculated from DOB                                |
-| `job_sector`      | Grouped sector derived from job title                  |
-| `trans_month`     | Month of transaction extracted from timestamp          |
-| `trans_hour`      | Hour of transaction                                    |
-| `trans_distance`  | Haversine distance between user and merchant locations |
+| Feature                | Description                                                                          |
+|------------------------|--------------------------------------------------------------------------------------|
+| `category`             | Transaction type/category                                                            |
+| `amt`                  | Transaction amount                                                                   |
+| `gender`               | Gender of card owner                                                                 |
+| `city`                 | Geographical data                                                                    |
+| `city_pop_group`       | Grouped city population                                                              |
+| `merchant`             | Zip and merchant info                                                                |
+| `is_fraud`             | Label: 1 for fraud, 0 otherwise                                                      |
+| `age_group`            | Age group; a secondary derivative of age from DOB                                    |
+| `job_sector`           | Grouped sector derived from job title                                                |
+| `trans_month`          | Month of transaction extracted from timestamp                                        |
+| `trans_hour`           | Hour of transaction                                                                  |
+| `trans_distance_group` | Haversine distance between user and merchant locations categorised based on nearness |
 
 #### 💡 Usage
 
@@ -126,7 +127,7 @@ This script increases the size of your training and test datasets by generating 
 
 The original fraud detection dataset is highly imbalanced and may be insufficient for robust model training. Augmentation helps:
 
-* Boost sample size by a factor of 10
+* Boost sample size by a factor of 5
 * Maintain original feature distributions
 * Improve generalization of machine learning models
 
@@ -150,7 +151,7 @@ The original fraud detection dataset is highly imbalanced and may be insufficien
 
 4. **Dataset Expansion**
 
-   * Generates 9× more rows than the original dataset.
+   * Generates 4× more rows than the original dataset.
    * Concatenates synthetic rows with original data.
    * Drops any accidental duplicates for uniqueness.
 
@@ -184,13 +185,56 @@ Ensure that the cleaned datasets `cleaned_fraud_train.csv` and `cleaned_fraud_te
 
 ---
 
+Great! Here's a clear and structured Markdown section you can add to your `README.md` (or internal project documentation) to describe the contents and purpose of your `data_preprocessing.py` file:
+
+---
+
+### 🧼 `data_preprocessing.py` — Dataset Balancing via Downsampling
+
+After augmentation, this script applies **downsampling** to ensure class balance in both the training and test datasets. It specifically addresses the class imbalance between fraudulent and non-fraudulent transactions.
+
+#### 🧠 Why Downsampling?
+
+Fraud datasets typically have a **severe class imbalance** — most transactions are non-fraudulent. This can bias the model toward always predicting the majority class. Downsampling ensures that both classes have equal representation by reducing the majority class to match the count of the minority class.
+
+#### ⚙️ What the Script Does
+
+1. **Load Augmented Datasets**
+
+   * Reads `augmented_fraud_train.csv` and `augmented_fraud_test.csv` from the `assets/` directory.
+
+2. **Apply Downsampling**
+
+   * Calculates the **minimum class count** between fraud and non-fraud.
+   * Applies `.sample()` on each class group to retain an equal number of samples from both classes.
+   * Resets the index to produce a clean, balanced dataset.
+
+#### 📦 Function Breakdown
+
+```python
+def data_downsampling(dataframe):
+    minimum_count = dataframe['is_fraud'].value_counts().min()
+    grouped_dataframe = dataframe.groupby('is_fraud')
+    grouped_dataframe = grouped_dataframe.apply(lambda x: x.sample(minimum_count))
+    dataframe = grouped_dataframe.reset_index(drop=True)
+    return dataframe
+```
+
+This function is applied to both training and test datasets:
+
+```python
+dataframe_augmented = data_downsampling(dataframe_augmented)
+dataframe_test_augmented = data_downsampling(dataframe_test_augmented)
+```
+
+#### 💾 Output
+
+* Balanced datasets held in memory as `dataframe_augmented` and `dataframe_test_augmented`.
+* Ready for feature scaling, encoding, or model training.
+
+---
+
 ### ⚠️ Note on Augmentation Challenges
 
 * **SMOTE Not Applicable**:
   Traditional oversampling techniques like **SMOTE** were not suitable for this dataset, as not all features are numeric. Categorical columns such as `job_sector`, `merchant`, and `category` make SMOTE incompatible without additional preprocessing or encoding.
-
-* **Augmentation Still In Progress**:
-  The current augmentation strategy uses statistical sampling, which faces limitations due to **high cardinality** and **variability** in some features. This has led to slower generation and occasional inefficiencies.
-
-* **Ongoing Improvements**:
-  Work is ongoing to **categorize high-variability entries** based on their value distributions. This will help reduce randomness and make the synthetic generation process both **faster** and **more semantically meaningful**.

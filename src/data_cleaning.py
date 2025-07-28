@@ -11,7 +11,9 @@ dataframe_test = pd.read_csv('../assets/fraudTest.csv')
 # a list of columns that will no longer be needed after the necessary information has been extracted including
 # the first column which is unnamed
 columns_to_remove = [dataframe.columns[0], 'cc_num', 'trans_num', 'unix_time', 'dob', 'trans_date_trans_time', 'lat',
-                     'long', 'merch_lat', 'merch_long', 'job', 'age', 'amt', 'trans_distance']
+                     'long', 'merch_lat', 'merch_long', 'job', 'age', 'amt', 'trans_distance', 'street', 'state', 'zip',
+                     'city_pop']
+
 # jobs are categorised into sectors and the sectors are loaded from a json file
 job_sectors = json.load(Path('../misc/job_sector.json').open())
 age_groups = json.load(Path('../misc/age_group.json').open())
@@ -56,7 +58,25 @@ def group_distance(data, groupings):
     try:
         selected_group = [k for k, v in groupings.items() if v[0] <= data < v[1]][0]
     except:
-        selected_group = "Farthest"
+        selected_group = "Far"
+    return selected_group
+
+
+# divide city population into 4 groups based on percentile distribution
+# Only 3 groups are highlighted here with anything more than or equal to the max
+# highlighted as the most populous by default
+def prepare_population_grouping(data_description):
+    _, _, _, _, quarter, half, three_quarter, full = data_description
+    groupings = {"Few": [0, quarter], "Average": [quarter, three_quarter], "Populous": [three_quarter, full + 1]}
+    return groupings
+
+
+# set city_pop into population groups
+def group_population(data, groupings):
+    try:
+        selected_group = [k for k, v in groupings.items() if v[0] <= data < v[1]][0]
+    except:
+        selected_group = "Populous"
     return selected_group
 
 
@@ -105,6 +125,9 @@ def clean_dataframe(dataframe_copy):
     groupings = prepare_distance_grouping(dataframe_copy['trans_distance'].describe())
     dataframe_copy["trans_distance_group"] = dataframe_copy['trans_distance'].apply(
         lambda x: group_distance(x, groupings))
+    population_groupings = prepare_population_grouping(dataframe_copy['city_pop'].describe())
+    dataframe_copy["city_pop_group"] = dataframe_copy['city_pop'].apply(
+        lambda x: group_population(x, population_groupings))
     # the predefined columns to be removed are dropped on the first axis
     dataframe_copy = dataframe_copy.drop(columns_to_remove, axis=1)
     return dataframe_copy
