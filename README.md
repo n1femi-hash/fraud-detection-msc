@@ -349,3 +349,18 @@ Data augmentation was intentionally excluded from this project.
 Initial attempts at synthetic data generation—whether by sampling from feature distributions or using techniques like SMOTE—consistently introduced excessive **noise** and **overfitting**, especially due to the presence of high-cardinality and categorical fields such as `job_sector`, `merchant`, and `category`.
 
 Rather than risk reduced generalization and misleading performance metrics, the pipeline relies on real, cleaned data combined with class balancing via **downsampling**, resulting in a more stable and trustworthy training process.
+
+---
+
+### 🔐 TAME Analysis in Cybersecurity Context
+
+The implementation aligns with the **TAME framework** commonly used in cybersecurity threat modeling. TAME stands for **Tactics, Attack Vectors, Motivations, and Execution**, and is used to understand adversarial behavior in digital systems, including financial fraud.
+
+| **TAME Component** | **Application in This Project**                                                                                                                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Tactics**        | The system extracts behavioral patterns associated with fraud, such as unusual transaction times (`time_of_day`), geographically distant merchant locations (`trans_distance_group`), and seasonal timing (`season`). These features help represent the tactics often used by fraudulent actors. |
+| **Attack Vectors** | While specific exploitation methods are not directly modeled, the dataset inherently captures the outcomes of attack vectors such as identity theft, stolen credentials, or POS manipulation. The model detects fraud by learning from these outcomes.                                           |
+| **Motivations**    | The model operates under the assumption of financially motivated fraud. Features such as transaction amount, merchant category, and job sector are indicative of attempts to extract monetary gain.                                                                                              |
+| **Execution**      | Execution strategies are captured through metadata, including timing (`trans_hour`), location (`trans_distance`), and context (`category`, `merchant`). These details contribute to profiling the execution stage of fraudulent activity.                                                        |
+
+This framework provides a structured lens through which the machine learning pipeline can be contextualized within broader cybersecurity practices, particularly in the detection and analysis of financial fraud.
