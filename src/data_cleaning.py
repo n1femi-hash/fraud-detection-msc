@@ -12,7 +12,7 @@ dataframe_test = pd.read_csv('../assets/fraudTest.csv')
 # the first column which is unnamed
 columns_to_remove = [dataframe.columns[0], 'cc_num', 'trans_num', 'unix_time', 'dob', 'trans_date_trans_time', 'lat',
                      'long', 'merch_lat', 'merch_long', 'job', 'age', 'amt', 'trans_distance', 'street', 'state', 'zip',
-                     'city_pop']
+                     'city_pop', 'trans_hour', 'trans_month', 'first', 'last', 'city', 'merchant']
 
 # jobs are categorised into sectors and the sectors are loaded from a json file
 job_sectors = json.load(Path('../misc/job_sector.json').open())
@@ -27,6 +27,33 @@ def extract_date(data):
     trans_date = trans_date.split("-")[1]
     time = time.split(":")[0]
     return pd.Series([int(trans_date), int(time)])
+
+
+# sets time of day based on corresponding 24 hour time
+def get_time_of_day(hour):
+    if 0 <= hour < 6:
+        return 'Late Night'
+    elif 6 <= hour < 12:
+        return 'Morning'
+    elif 12 <= hour < 17:
+        return 'Afternoon'
+    elif 17 <= hour < 21:
+        return 'Evening'
+    else:
+        return 'Night'
+
+
+# sets season based on corresponding month number and the seasons of the northern hemisphere since
+# the location in this dataset is the US
+def get_season(month):
+    if month in [12, 1, 2]:
+        return 'Winter'
+    elif month in [3, 4, 5]:
+        return 'Spring'
+    elif month in [6, 7, 8]:
+        return 'Summer'
+    else:  # 9, 10, 11
+        return 'Autumn'
 
 
 # this uses the haversine formula to get the distance between the card user and the merchant
@@ -119,6 +146,10 @@ def clean_dataframe(dataframe_copy):
     dataframe_copy["job_sector"] = dataframe_copy["job"].apply(set_job_sector)
     # the 'trans_month' and 'trans_hour' columns are formed from the date-time column simultaneously
     dataframe_copy[["trans_month", "trans_hour"]] = dataframe_copy["trans_date_trans_time"].apply(extract_date)
+    # groups the hour into category of time of day e.g. Night, Day, Midnight, etc.
+    dataframe_copy['time_of_day'] = dataframe_copy['trans_hour'].apply(get_time_of_day)
+    # groups the month into season
+    dataframe_copy['season'] = dataframe_copy['trans_month'].apply(get_season)
     # the 'trans_distance' column formed by applying the 'calculate_distance' function on the first axis
     # of the dataframe
     dataframe_copy["trans_distance"] = dataframe_copy.apply(calculate_distance, axis=1)
