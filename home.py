@@ -1,5 +1,8 @@
+import json
 import streamlit as st
 from datetime import datetime
+
+from src.model_interface import process_input, run_prediction
 
 st.title("💳 Fraud Detection Input Form")
 
@@ -63,5 +66,13 @@ if st.button("✅ Submit"):
         "merch_lat": merch_lat,
         "merch_long": merch_long,
     }
-    st.success("✅ Form Submitted!")
-    st.json(input_record)
+    # st.success("✅ Form Submitted!")
+    processed_data = process_input(json.dumps([input_record]))
+    # st.json(input_record)
+    print(processed_data.shape)
+    # st.dataframe(processed_data)
+    prediction, verdict = run_prediction(processed_data, threshold=80)
+    if verdict:
+        st.error(prediction)
+    else:
+        st.success(prediction)

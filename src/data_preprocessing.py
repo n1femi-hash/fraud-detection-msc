@@ -1,11 +1,13 @@
 import pandas as pd
 import warnings
 
+from src.compile_file_path import get_file_path
+
 # to suppress 'group_by' deprecation warning
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-dataframe_augmented = pd.read_csv('../assets/cleaned_fraud_train.csv')
-dataframe_test_augmented = pd.read_csv('../assets/cleaned_fraud_test.csv')
+dataframe_augmented = pd.read_csv(get_file_path('assets/cleaned_fraud_train.csv'))
+dataframe_test_augmented = pd.read_csv(get_file_path('assets/cleaned_fraud_test.csv'))
 
 # for display purposes
 print("Before Downsampling")
@@ -64,8 +66,14 @@ full_columns = []
 full_columns.extend(full_train_columns)
 full_columns.extend(full_test_columns)
 full_columns = list(set(full_columns))
-dataframe_augmented = dataframe_augmented.reindex(columns=full_columns, fill_value="0.0")
-dataframe_test_augmented = dataframe_test_augmented.reindex(columns=full_columns, fill_value="0.0")
+
+
+def dataframe_reindex(dataframe):
+    return dataframe.reindex(columns=full_columns, fill_value="0")
+
+
+dataframe_augmented = dataframe_reindex(dataframe_augmented)
+dataframe_test_augmented = dataframe_reindex(dataframe_test_augmented)
 
 # for display purposes
 print("After Downsampling")
@@ -87,5 +95,5 @@ print()
 
 print()
 print()
-dataframe_augmented.to_csv('../assets/preprocessed_fraud_train.csv', index=False)
-dataframe_test_augmented.to_csv('../assets/preprocessed_fraud_test.csv', index=False)
+# dataframe_augmented.to_csv('../assets/preprocessed_fraud_train.csv', index=False)
+# dataframe_test_augmented.to_csv('../assets/preprocessed_fraud_test.csv', index=False)

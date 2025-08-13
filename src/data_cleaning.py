@@ -3,11 +3,12 @@ import pandas as pd
 from haversine import haversine
 from datetime import date
 from pathlib import Path
+from src.compile_file_path import get_file_path
 
 # loads the training dataset
-dataframe = pd.read_csv('../assets/fraudTrain.csv')
+dataframe = pd.read_csv(get_file_path('assets/fraudTrain.csv'))
 # loads the test dataset
-dataframe_test = pd.read_csv('../assets/fraudTest.csv')
+dataframe_test = pd.read_csv(get_file_path('assets/fraudTest.csv'))
 # a list of columns that will no longer be needed after the necessary information has been extracted including
 # the first column which is unnamed
 columns_to_remove = [dataframe.columns[0], 'cc_num', 'trans_num', 'unix_time', 'dob', 'trans_date_trans_time', 'lat',
@@ -15,13 +16,13 @@ columns_to_remove = [dataframe.columns[0], 'cc_num', 'trans_num', 'unix_time', '
                      'city_pop', 'trans_hour', 'trans_month', 'first', 'last', 'city', 'merchant']
 
 # jobs are categorised into sectors and the sectors are loaded from a json file
-job_sectors = json.load(Path('../misc/job_sector.json').open())
-age_groups = json.load(Path('../misc/age_group.json').open())
+job_sectors = json.load(Path(get_file_path('misc/job_sector.json')).open())
+age_groups = json.load(Path(get_file_path('misc/age_group.json')).open())
 
 
 # this extracts the month and hour of transaction from trans_date_trans_time column
 def extract_date(data):
-    split_data = data.split(" ")
+    split_data = str(data).split(" ")
     trans_date = split_data[0]
     time = split_data[1]
     trans_date = trans_date.split("-")[1]
@@ -67,7 +68,7 @@ def calculate_distance(data):
 
 # this extracts the age from the date of birth of the users
 def extract_age(data):
-    dob = [int(d) for d in data.split("-")]
+    dob = [int(d) for d in str(data).split("-")]
     difference = date.today() - date(dob[0], dob[1], dob[2])
     return difference.days // 365
 
@@ -160,15 +161,19 @@ def clean_dataframe(dataframe_copy):
     dataframe_copy["city_pop_group"] = dataframe_copy['city_pop'].apply(
         lambda x: group_population(x, population_groupings))
     # the predefined columns to be removed are dropped on the first axis
-    dataframe_copy = dataframe_copy.drop(columns_to_remove, axis=1)
+    try:
+        dataframe_copy = dataframe_copy.drop(columns_to_remove, axis=1)
+    except KeyError:
+        columns_to_remove.pop(0)
+        dataframe_copy = dataframe_copy.drop(columns_to_remove, axis=1)
     return dataframe_copy
 
 
 # the cleaned dataframes for both training and testing
-dataframe = clean_dataframe(dataframe)
-dataframe_test = clean_dataframe(dataframe_test)
+# dataframe = clean_dataframe(dataframe)
+# dataframe_test = clean_dataframe(dataframe_test)
 
 # the cleaned dataset is saved to new files with 'index' set to false
 # to avoid an unnamed index column in the resulting file
-dataframe.to_csv('../assets/cleaned_fraud_train.csv', index=False)
-dataframe_test.to_csv('../assets/cleaned_fraud_test.csv', index=False)
+# dataframe.to_csv('../assets/cleaned_fraud_train.csv', index=False)
+# dataframe_test.to_csv('../assets/cleaned_fraud_test.csv', index=False)

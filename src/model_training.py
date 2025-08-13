@@ -11,10 +11,12 @@ from tensorflow.keras.layers import Conv1D, MaxPooling1D, Flatten, Dense, BatchN
 
 import os
 
+from src.compile_file_path import get_file_path
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-dataframe_preprocessed = pd.read_csv('../assets/preprocessed_fraud_train.csv')
-dataframe_test_preprocessed = pd.read_csv('../assets/preprocessed_fraud_test.csv')
+dataframe_preprocessed = pd.read_csv(get_file_path('assets/preprocessed_fraud_train.csv'))
+dataframe_test_preprocessed = pd.read_csv(get_file_path('assets/preprocessed_fraud_test.csv'))
 
 dataframe_preprocessed = dataframe_preprocessed.sample(frac=1, random_state=42)
 
@@ -42,10 +44,10 @@ model.compile(optimizer='adam', metrics=['accuracy', Precision(), Recall(), AUC(
 print("Model Training")
 print("======================")
 history = model.fit(x_train, y_train, validation_split=0.4, epochs=15, batch_size=128)
-model.save('../model/fraud_detection_model')
+model.save(get_file_path('model/fraud_detection_model'))
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 converted_model = converter.convert()
-with open('../model/fraud_detection_model.tflite', 'wb') as f:
+with open(get_file_path('model/fraud_detection_model.tflite'), 'wb') as f:
     f.write(converted_model)
     f.close()
 
