@@ -66,6 +66,10 @@ full_columns = []
 full_columns.extend(full_train_columns)
 full_columns.extend(full_test_columns)
 full_columns = list(set(full_columns))
+# save columns as string
+with open(get_file_path('misc/columns.txt'), 'w') as file:
+    file.write('.'.join(full_columns))
+    file.close()
 
 
 def dataframe_reindex(dataframe):

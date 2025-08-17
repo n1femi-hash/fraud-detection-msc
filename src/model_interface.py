@@ -1,13 +1,10 @@
-from unittest.mock import inplace
-
 import numpy as np
 from tensorflow.keras.models import load_model
-import tensorflow as tf
 import pandas as pd
 
 from src.compile_file_path import get_file_path
-from src.data_cleaning import clean_dataframe
-from src.data_preprocessing import data_vectorisation, dataframe_reindex
+from src.operations.cleaning_operations import clean_dataframe
+from src.operations.preprocessing_operations import data_vectorisation, dataframe_reindex
 import os
 
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
