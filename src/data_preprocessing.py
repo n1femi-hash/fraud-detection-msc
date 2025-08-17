@@ -99,5 +99,5 @@ print()
 
 print()
 print()
-# dataframe_augmented.to_csv('../assets/preprocessed_fraud_train.csv', index=False)
-# dataframe_test_augmented.to_csv('../assets/preprocessed_fraud_test.csv', index=False)
+dataframe_augmented.to_csv(get_file_path('assets/preprocessed_fraud_train.csv'), index=False)
+dataframe_test_augmented.to_csv(get_file_path('assets/preprocessed_fraud_test.csv'), index=False)

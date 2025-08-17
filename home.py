@@ -8,12 +8,12 @@ st.title("💳 Fraud Detection Input Form")
 
 # === Transaction Details ===
 with st.expander("📅 Transaction Details", expanded=True):
-    trans_date = st.date_input("Transaction Date", value=datetime(2024, 5, 15))
-    trans_time = st.time_input("Transaction Time", value=datetime(2024, 5, 15, 14, 30).time())
+    trans_date = st.date_input("Transaction Date", value=datetime(2025, 5, 15), max_value=datetime.now())
+    trans_time = st.time_input("Transaction Time", value=datetime(2025, 5, 15, 00, 00).time())
     trans_datetime = datetime.combine(trans_date, trans_time)
 
     cc_num = st.text_input("Credit Card Number", value="1234567890123456")
-    merchant = st.text_input("Merchant Name/ID", value="ABC Store")
+    merchant = st.text_input("Merchant Name/ID", value="fraud_Rodriguez, Yost and Jenkins")
     category = st.text_input("Transaction Category", value="shopping_pos")
     amt = st.number_input("Transaction Amount", min_value=0.0, step=0.01, value=75.50)
 
@@ -32,7 +32,7 @@ with st.expander("🧑 Cardholder Details", expanded=True):
     city_pop = st.number_input("City Population", min_value=0, value=8419600)
 
     job = st.text_input("Job Title", value="Engineer")
-    dob = st.date_input("Date of Birth", value=datetime(1990, 1, 1))
+    dob = st.date_input("Date of Birth", min_value=datetime(1900, 1, 1), value=datetime(1990, 1, 1))
 
 # === Merchant Details ===
 with st.expander("🏪 Merchant Details", expanded=True):
