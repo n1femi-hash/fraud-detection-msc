@@ -72,6 +72,7 @@ if st.button("✅ Submit"):
     print(processed_data.shape)
     # st.dataframe(processed_data)
     prediction, verdict = run_prediction(processed_data, threshold=80)
+    # error or success verdict
     if verdict:
         st.error(prediction)
     else:
